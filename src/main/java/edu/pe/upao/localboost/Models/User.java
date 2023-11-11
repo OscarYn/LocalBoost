@@ -1,13 +1,16 @@
 package edu.pe.upao.localboost.Models;
 
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
+import java.time.Instant;
 import java.time.LocalDate;
+import java.util.List;
 
 @Entity
 @Table(name = "users")
@@ -21,9 +24,9 @@ public class User {
     @Id
     @Column(name = "user_id")
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long userid;
+    private Long userId;
     @Getter
-    @Column(name = "firs_name")
+    @Column(name = "first_name")
     private String firstName;
     @Getter
     @Column(name = "last_name")
@@ -41,15 +44,16 @@ public class User {
     @Column(name = "bussiness_name")
     private String bussinessName;
     @Getter
+    @JsonIgnore
     @Column(name = "registration_date")
-    private LocalDate registrationDate;
+    private Instant registrationDate;
 
-    public Long getUserid() {
-        return userid;
+    public Long getUserId() {
+        return userId;
     }
 
-    public void setUserid(Long userid) {
-        this.userid = userid;
+    public void setUserId(Long userId) {
+        this.userId = userId;
     }
 
     public String getFirstName() {
@@ -100,11 +104,11 @@ public class User {
         this.bussinessName = bussinessName;
     }
 
-    public LocalDate getRegistrationDate() {
+    public Instant getRegistrationDate() {
         return registrationDate;
     }
 
-    public void setRegistrationDate(LocalDate registrationDate) {
+    public void setRegistrationDate(Instant registrationDate) {
         this.registrationDate = registrationDate;
     }
 }

@@ -1,39 +1,24 @@
-package edu.pe.upao.localboost.Models;
+package edu.pe.upao.localboost.Dtos;
 
-import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import edu.pe.upao.localboost.Models.Product;
+import edu.pe.upao.localboost.Models.User;
 
-import java.time.LocalDate;
-
-@Entity
-@Table(name = "productos")
-@Data
-@AllArgsConstructor
-@NoArgsConstructor
-
-public class HistoryBuyModel {
-
-    @Id
-    @Column(name = "product_id")
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long productId;
-    @Column (name = "name")
+public class ProductDTO {
     private String name;
-    @Column (name = "description")
     private String description;
-    @Column (name = "price")
     private int price;
-    @Column (name = "category")
     private String category;
+    private UserDTO userDTO;
 
-    public Long getProductId() {
-        return productId;
-    }
+    public ProductDTO(Product product) {
+        this.name = product.getName();
+        this.description = product.getDescription();
+        this.price = product.getPrice();
+        this.category = product.getCategory();
 
-    public void setProductId(Long productId) {
-        this.productId = productId;
+        if(product.getUser() != null){
+            this.userDTO = new UserDTO(product.getUser());
+        }
     }
 
     public String getName() {
@@ -66,5 +51,13 @@ public class HistoryBuyModel {
 
     public void setCategory(String category) {
         this.category = category;
+    }
+
+    public UserDTO getUserDTO() {
+        return userDTO;
+    }
+
+    public void setUserDTO(UserDTO userDTO) {
+        this.userDTO = userDTO;
     }
 }

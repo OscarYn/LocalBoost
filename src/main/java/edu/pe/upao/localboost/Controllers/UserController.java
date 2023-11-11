@@ -1,8 +1,12 @@
 package edu.pe.upao.localboost.Controllers;
 
-import edu.pe.upao.localboost.Models.Coment;
+import edu.pe.upao.localboost.Dtos.UserDTO;
+import edu.pe.upao.localboost.Models.Product;
 import edu.pe.upao.localboost.Models.User;
+import edu.pe.upao.localboost.Repositories.ProductRepository;
 import edu.pe.upao.localboost.Services.UserService;
+import jakarta.persistence.EntityNotFoundException;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -20,43 +24,33 @@ public class UserController {
         this.userService = userService;
     }
 
-    @GetMapping
-    private List<User> getAllUsers(){
-        return userService.getAllUsers();
+    @PostMapping("/register")
+    public ResponseEntity<?> addUser(@RequestBody User user){
+        try{
+            String newUser = userService.addUser(user);
+            return new ResponseEntity<>(newUser, HttpStatus.CREATED);
+        } catch (IllegalStateException sms){
+            return new ResponseEntity<>(sms.getMessage(), HttpStatus.BAD_REQUEST);
+        }
     }
-
-    @GetMapping("/{userid}")
-    public User getUserById(@PathVariable Long userid){
-        return userService.getUserById(userid).orElse(new User());
+    @PutMapping("/{userId}")
+    public ResponseEntity<String> updateUser(@RequestBody User updatedUser, @PathVariable Long userId) {
+        try {
+            String message = userService.updateUser(updatedUser, userId);
+            return ResponseEntity.ok(message);
+        } catch (IllegalArgumentException | IllegalStateException ex) {
+            return ResponseEntity.badRequest().body(ex.getMessage());
+        }
     }
-
-    @PostMapping
-    public void addUser(@RequestBody User user){
-        userService.addUser(user);
-    }
-
-    @PutMapping("/{userid}")
-    public void addUser(@RequestBody User user, @PathVariable Long userid){
-        userService.updateUser(user, userid);
-    }
-
-    @DeleteMapping("/{userid}")
-    public void deleteUser(@PathVariable Long userid){
-        userService.deleteUserById(userid);
-    }
-
     @PostMapping("/login")
-    public ResponseEntity<Coment> login(@RequestBody Map<String, String> loginRequest) {
-        String email = loginRequest.get("email");
-        String password = loginRequest.get("password");
-        User user = userService.verifyAccount(email, password);
-
-        if (user != null) {
-            String comment = "Estas de vuelta: " + user.getFirstName() + user.getLastName();
-            Coment res = new Coment(comment, user);
-            return new ResponseEntity<>(res, HttpStatus.OK);
-        } else {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
+    public ResponseEntity<?> loginUser(@RequestBody Map<String, String> loginRequest) {
+        try {
+            String email = loginRequest.get("email");
+            String password = loginRequest.get("password");
+            User loginuser = userService.verifyAccount(email, password);
+            return new ResponseEntity<>(loginuser, HttpStatus.OK);
+        }catch (IllegalStateException sms){
+            return new ResponseEntity<>(sms.getMessage(), HttpStatus.UNAUTHORIZED);
         }
     }
 
