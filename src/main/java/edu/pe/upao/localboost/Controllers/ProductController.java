@@ -23,7 +23,7 @@ public class ProductController {
         return productService.getProductById(productId).orElse(new Product());
     }
     @GetMapping
-    private List<ProductDTO> getAllChallenge(){
+    private List<ProductDTO> getAllProduct(){
         return productService.getAllProduct();
     }
 
@@ -34,6 +34,15 @@ public class ProductController {
             return new ResponseEntity<>(newProduct, HttpStatus.CREATED);
         } catch (IllegalStateException sms){
             return new ResponseEntity<>(sms.getMessage(), HttpStatus.BAD_REQUEST);
+        }
+    }
+    @PostMapping("/search")
+    public ResponseEntity<?> searchProduct(@RequestBody Product product) {
+        try {
+            List<ProductDTO> products = productService.searchProduct(product);
+            return ResponseEntity.ok(products);
+        } catch (IllegalStateException e) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(e.getMessage());
         }
     }
 }

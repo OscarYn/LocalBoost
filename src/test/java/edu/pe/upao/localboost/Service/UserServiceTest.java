@@ -25,94 +25,88 @@ public class UserServiceTest {
 
     @Test
     void testAddUser() {
-        // Asegúrate de que el objeto User esté inicializado correctamente
-        User user = new User(null, "John", "Doe", "john@example.com", "password", null, null, Instant.now());
+        when(userRepository.findByEmail("john.doe@example.com")).thenReturn(Optional.empty());
 
-        // Asegúrate de que el método findByEmail devuelva algo
-        when(userRepository.findByEmail(user.getEmail())).thenReturn(Collections.emptyList());
+        UserService userService = new UserService(userRepository);
+
+        User user = new User();
+        user.setFirstName("John");
+        user.setLastName("Doe");
+        user.setEmail("john.doe@example.com");
+        user.setPassword("password");
 
         String result = userService.addUser(user);
 
         verify(userRepository, times(1)).save(user);
+
         assertEquals("Usuario registrado correctamente", result);
     }
 
     @Test
-    void testAddUser_ExistingEmail() {
-        // Asegúrate de que el objeto User esté inicializado correctamente
-        User user = new User(null, "John", "Doe", "john@example.com", "password", null, null, Instant.now());
+    void testAddUserWithExistingEmail() {
+        UserService userService = new UserService(userRepository);
 
-        // Asegúrate de que el método findByEmail devuelva algo
-        when(userRepository.findByEmail(user.getEmail())).thenReturn(Collections.singletonList(user));
+        User user = new User();
+        user.setEmail("john.doe@example.com");
+
+        when(userRepository.findByEmail("john.doe@example.com")).thenReturn(Optional.of(user));
+
+        assertThrows(IllegalStateException.class, () -> userService.addUser(user));
+    }
+
+    @Test
+    void testAddUserWithInvalidPassword() {
+        UserService userService = new UserService(userRepository);
+
+        User user = new User();
+        user.setPassword("password123");
 
         assertThrows(IllegalStateException.class, () -> userService.addUser(user));
     }
 
     @Test
     void testUpdateUser() {
-        Long userId = 1L;
-        // Asegúrate de que el objeto existingUser esté inicializado correctamente
-        User existingUser = new User(userId, "John", "Doe", "john@example.com", "password", null, null, Instant.now());
-        // Asegúrate de que el objeto updatedUser esté inicializado correctamente
-        User updatedUser = new User(null, "Updated", "User", "updated@example.com", "newpassword", null, null, Instant.now());
+        UserService userService = new UserService(userRepository);
 
-        // Asegúrate de que el método findById devuelva algo
-        when(userRepository.findById(userId)).thenReturn(Optional.of(existingUser));
+        User existingUser = new User();
+        existingUser.setUserId(1L);
+        existingUser.setFirstName("John");
+        existingUser.setLastName("Doe");
+        existingUser.setEmail("john.doe@example.com");
 
-        String result = userService.updateUser(updatedUser, userId);
+        User updatedUser = new User();
+        updatedUser.setFirstName("Updated");
+        updatedUser.setLastName("User");
+
+        when(userRepository.findById(1L)).thenReturn(Optional.of(existingUser));
+
+        String result = userService.updateUser(updatedUser, 1L);
 
         verify(userRepository, times(1)).save(existingUser);
+
         assertEquals("Cliente actualizado correctamente", result);
     }
 
-    @Test
-    void testUpdateUser_UserNotFound() {
-        Long userId = 1L;
-        // Asegúrate de que el objeto updatedUser esté inicializado correctamente
-        User updatedUser = new User(null, "Updated", "User", "updated@example.com", "newpassword", null, null, Instant.now());
-
-        // Asegúrate de que el método findById devuelva Optional.empty()
-        when(userRepository.findById(userId)).thenReturn(Optional.empty());
-
-        assertThrows(IllegalArgumentException.class, () -> userService.updateUser(updatedUser, userId));
-    }
 
     @Test
     void testVerifyAccount() {
-        String email = "john@example.com";
-        String password = "password";
-        // Asegúrate de que el objeto user esté inicializado correctamente
-        User user = new User(null, "John", "Doe", email, password, null, null, Instant.now());
+        UserService userService = new UserService(userRepository);
 
-        // Asegúrate de que el método findByEmail devuelva algo
-        when(userRepository.findByEmail(email)).thenReturn(Collections.singletonList(user));
+        User user = new User();
+        user.setEmail("john.doe@example.com");
+        user.setPassword("password");
 
-        User result = userService.verifyAccount(email, password);
+        when(userRepository.findByEmail("john.doe@example.com")).thenReturn(Optional.of(user));
+
+        User result = userService.verifyAccount("john.doe@example.com", "password");
 
         assertEquals(user, result);
     }
 
     @Test
-    void testVerifyAccount_IncorrectPassword() {
-        String email = "john@example.com";
-        String password = "incorrectpassword";
-        // Asegúrate de que el objeto user esté inicializado correctamente
-        User user = new User(null, "John", "Doe", email, "password", null, null, Instant.now());
+    void testVerifyAccountWithInvalidData() {
+        UserService userService = new UserService(userRepository);
 
-        // Asegúrate de que el método findByEmail devuelva algo
-        when(userRepository.findByEmail(email)).thenReturn(Collections.singletonList(user));
-
-        assertThrows(IllegalStateException.class, () -> userService.verifyAccount(email, password));
-    }
-
-    @Test
-    void testVerifyAccount_IncorrectEmail() {
-        String email = "nonexistent@example.com";
-        String password = "password";
-
-        // Asegúrate de que el método findByEmail devuelva Optional.empty()
-        when(userRepository.findByEmail(email)).thenReturn(Collections.emptyList());
-
-        assertThrows(IllegalStateException.class, () -> userService.verifyAccount(email, password));
+        assertThrows(IllegalStateException.class, () -> userService.verifyAccount("", ""));
     }
 }

@@ -78,5 +78,4 @@ public class ProductServiceTest {
         verify(productRepository, times(1)).save(product);
         assertEquals("Producto registrado correctamente", result);
     }
-
 }

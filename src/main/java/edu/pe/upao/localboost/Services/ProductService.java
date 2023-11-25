@@ -10,6 +10,7 @@ import org.springframework.stereotype.Service;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Transactional
 @Service
@@ -41,5 +42,24 @@ public class ProductService {
         }
         productRepository.save(product);
         return "Producto registrado correctamente";
+    }
+
+    public List<ProductDTO> searchProduct(Product product) {
+        String category = product.getCategory();
+
+        if (category == null || category.isEmpty()) {
+            throw new IllegalStateException("Por favor ingresa la categoria");
+        }
+
+        List<Product> products = productRepository.findByCategory(category);
+
+        if (products.isEmpty()) {
+            throw new IllegalStateException("No existe esa categoria");
+        }
+
+        List<ProductDTO> productDTOs = products.stream()
+                .map(ProductDTO::new)
+                .collect(Collectors.toList());
+        return productDTOs;
     }
 }

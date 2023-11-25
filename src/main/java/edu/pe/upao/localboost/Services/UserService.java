@@ -8,6 +8,7 @@ import org.springframework.stereotype.Service;
 
 import java.time.Instant;
 import java.util.List;
+import java.util.Optional;
 
 
 @Service
@@ -23,7 +24,7 @@ public class UserService {
     }
 
     public String addUser(User user){
-        List<User> existingUserByEmail = userRepository.findByEmail(user.getEmail());
+        Optional<User> existingUserByEmail = userRepository.findByEmail(user.getEmail());
         user.setRegistrationDate(Instant.now());
 
         if (isEmptyOrWhitespace(user.getFirstName()) || isEmptyOrWhitespace(user.getLastName()) || isEmptyOrWhitespace(user.getEmail()) || user.getPassword() == null) {
@@ -68,9 +69,9 @@ public class UserService {
         if (isEmptyOrWhitespace(email) || isEmptyOrWhitespace(password)) {
             throw new IllegalStateException("Correo y contraseña son campos requeridos");
         }
-        List<User> existingUserByCount = userRepository.findByEmail(email);
+        Optional<User> existingUserByCount = userRepository.findByEmail(email);
         if (!existingUserByCount.isEmpty()) {
-            User useremail = existingUserByCount.get(0);
+            User useremail = existingUserByCount.get();
             if (useremail.getPassword().equals(password)) {
                 return useremail;
             }else{
